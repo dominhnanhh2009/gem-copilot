@@ -1,0 +1,38 @@
+# Các file tạm của hệ điều hành
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Thư mục chứa các package được tải về
+node_modules/
+vendor/
+
+# Các file cấu hình IDE/Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Các file biến môi trường
+.env
+.env.*
+!.env.example
+
+# Các file nhật ký (logs)
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Các file build và biên dịch
+dist/
+build/
+out/
+*.o
+*.obj
+*.exe
+*.dll
+
+# Thư mục tạm
+temp/
+tmp/
