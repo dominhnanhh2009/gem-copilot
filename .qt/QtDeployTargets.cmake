@@ -1,0 +1,8 @@
+set(__QT_DEPLOY_TARGET_gemini_engine_FILE D:/DoMinhhAnhh/codes/gem-copilot/libgemini_engine.a)
+set(__QT_DEPLOY_TARGET_gemini_engine_TYPE STATIC_LIBRARY)
+set(__QT_DEPLOY_TARGET_screen-copilot_FILE D:/DoMinhhAnhh/codes/gem-copilot/screen-copilot.exe)
+set(__QT_DEPLOY_TARGET_screen-copilot_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_screen-copilot_RUNTIME_DLLS C:/msys64/ucrt64/bin/Qt6Widgets.dll;C:/msys64/ucrt64/bin/Qt6Gui.dll;C:/msys64/ucrt64/bin/Qt6Core.dll;C:/msys64/ucrt64/bin/libcurl-4.dll)
+set(__QT_DEPLOY_TARGET_test_app_FILE D:/DoMinhhAnhh/codes/gem-copilot/test_app.exe)
+set(__QT_DEPLOY_TARGET_test_app_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_test_app_RUNTIME_DLLS C:/msys64/ucrt64/bin/Qt6Widgets.dll;C:/msys64/ucrt64/bin/libcurl-4.dll;C:/msys64/ucrt64/bin/Qt6Gui.dll;C:/msys64/ucrt64/bin/Qt6Core.dll)

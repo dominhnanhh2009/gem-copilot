@@ -48,6 +48,8 @@ public:
      */
     explicit GeminiEngine(std::string api_key);
 
+    std::string get_api_key() const { return api_key_; }
+
     /**
      * @brief Destructor to cleanup global CURL state.
      */
