@@ -17,6 +17,6 @@ Giao diện tập trung vào việc:
 *   Trả về kết quả trực tiếp hoặc mã lỗi.
 
 ### Lưu ý về Đường dẫn File
-*   Dự án sử dụng `std::wstring` cho tất cả các đường dẫn file để đảm bảo hỗ trợ Unicode (hỗ trợ tiếng Việt có dấu, ký tự đặc biệt).
+*   Dự án sử dụng `std::filesystem::path` cho tất cả các đường dẫn file để đảm bảo hỗ trợ Unicode (hỗ trợ tiếng Việt có dấu, ký tự đặc biệt).
 *   Khi cung cấp đường dẫn trong mã nguồn, hãy luôn sử dụng tiền tố `L` (ví dụ: `L"C:\\path\\to\\file.jpg"`).
 
