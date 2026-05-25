@@ -23,19 +23,32 @@
 #include <QBuffer>
 #include <QByteArray>
 #include <QFile>
+#include <QMessageBox>
 #include "gemini_engine.h"
 
 // Helper function to read .env file from directory above
 std::string get_api_key_from_env() {
-    std::ifstream file("../.env");
+    std::ifstream file(".env");
+    if (!file.is_open()) {
+    return "";
+}
+
     std::string line;
-    if (file.is_open()) {
-        while (std::getline(file, line)) {
-            if (line.substr(0, 14) == "GEMINI_API_KEY") {
-                return line.substr(15);
+    while (std::getline(file, line)) {
+        if (line.substr(0, 14) == "GEMINI_API_KEY") {
+            // Dòng là "GEMINI_API_KEY=AIza..."
+            // Nếu có dấu =, lấy từ ký tự sau dấu =
+            size_t eqPos = line.find('=');
+            if (eqPos != std::string::npos) {
+                return line.substr(eqPos + 1);
             }
+            // Nếu không có =, lấy từ ký tự sau khoảng trắng
+            size_t spacePos = line.find(' ');
+            if (spacePos != std::string::npos) {
+                return line.substr(spacePos + 1);
         }
     }
+}
     return "";
 }
 
@@ -91,22 +104,32 @@ public:
     MainWindow() : lastCtrlPressTime(0), gemini(get_api_key_from_env()) {
         setWindowTitle("Screen Copilot");
 
+        std::string apiKey = get_api_key_from_env();
+        if (apiKey.empty()) {
+            QTimer::singleShot(0, []() {
+                QMessageBox::warning(nullptr, "API Key Missing",
+                                   "GEMINI_API_KEY not found in .env file.\n"
+                                   "The application may not function correctly.");
+            });
+        }
+
         // Bắt đầu với trạng thái thu gọn
-        resize(500, 50);
-        setFixedSize(500, 50);
+        resize(500, 40); // Mỏng hơn nữa
+        setFixedSize(500, 40); // Mỏng hơn nữa
 
         auto* mainLayout = new QVBoxLayout(this);
-        mainLayout->setContentsMargins(5, 5, 5, 5);
-        mainLayout->setSpacing(5);
+        mainLayout->setContentsMargins(2, 2, 2, 2); // Mỏng hơn
+        mainLayout->setSpacing(2); // Mỏng hơn
 
         // Layout ngang chính: [Preview] [Prompt] [Capture Button]
         auto* horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setContentsMargins(0, 0, 0, 0); // Mỏng hơn
 
         // Hiển thị preview ảnh
         imagePreview = new QLabel("No image", this);
-        imagePreview->setFixedSize(60, 40); // Mỏng hơn một chút
+        imagePreview->setFixedSize(50, 35); // Mỏng hơn nữa
         imagePreview->setAlignment(Qt::AlignCenter);
-        imagePreview->setStyleSheet("border: 1px solid gray;");
+        imagePreview->setStyleSheet("border: 1px solid gray; font-size: 8px;");
         imagePreview->setToolTip("double ctrl để preview ảnh chụp màn hình.\nnhấn vào đây để gỡ hình khỏi prompt");
         // Cho phép nhận sự kiện click
         imagePreview->installEventFilter(this);
@@ -114,13 +137,14 @@ public:
 
         // Ô Prompt
         promptEdit = new PromptEdit(this);
-        promptEdit->setFixedHeight(40); // Mỏng hơn
+        promptEdit->setFixedHeight(35); // Mỏng hơn nữa
+        promptEdit->setStyleSheet("padding: 2px;");
         horizontalLayout->addWidget(promptEdit);
 
         // Nút Capture
         auto* captureBtn = new QPushButton(this);
         captureBtn->setIcon(style()->standardIcon(QStyle::SP_ComputerIcon));
-        captureBtn->setFixedSize(40, 40); // Mỏng hơn
+        captureBtn->setFixedSize(35, 35); // Mỏng hơn nữa
         captureBtn->setToolTip("chụp màn hình\n(ctrl+s)");
         connect(captureBtn, &QPushButton::clicked, this, &MainWindow::handleCapture);
         horizontalLayout->addWidget(captureBtn);
@@ -147,7 +171,7 @@ public:
             if (isVisible) {
                 // Đang hiện, giờ ẩn đi và thu gọn
                 responseEdit->hide();
-                setFixedSize(500, 50);
+                setFixedSize(500, 40);
             } else {
                 // Đang ẩn, giờ hiện ra và mở rộng
                 setMinimumSize(500, 400);
@@ -252,6 +276,8 @@ private slots:
         responseEdit->show(); // Hiện khi có submit
 
         // Mở rộng cửa sổ khi bắt đầu gửi request
+        setMinimumSize(500, 400);
+        setMaximumSize(16777215, 16777215);
         resize(500, 400);
 
         responseEdit->append("<b>You:</b> " + text);
@@ -285,8 +311,9 @@ private slots:
             responseEdit->append("<b>AI:</b> " + QString::fromStdString(response));
                 });
         } catch (const std::exception& e) {
-                QMetaObject::invokeMethod(this, [this, e]() {
-            responseEdit->append("<b>Error:</b> " + QString::fromUtf8(e.what()));
+            std::cout<<e.what();
+                QMetaObject::invokeMethod(this, [this, e_string=e.what()]() {
+            responseEdit->append("<b>Error:</b> " + QString::fromUtf8(e_string));
                 });
         }
         });
