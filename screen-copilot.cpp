@@ -52,6 +52,24 @@ std::string get_api_key_from_env() {
     return "";
 }
 
+// Helper function to read model name from .env
+std::string get_model_name_from_env() {
+    std::ifstream file(".env");
+
+    if (!file.is_open()) return "";
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.substr(0, 10) == "MODEL_NAME") {
+            size_t eqPos = line.find('=');
+            if (eqPos != std::string::npos) {
+                return line.substr(eqPos + 1);
+            }
+        }
+    }
+    return "";
+}
+
 // Helper to encode file to base64
 std::string encode_file_to_base64(const std::string& filename) {
     QFile file(QString::fromStdString(filename));
@@ -105,11 +123,15 @@ public:
         setWindowTitle("Screen Copilot");
 
         std::string apiKey = get_api_key_from_env();
-        if (apiKey.empty()) {
-            QTimer::singleShot(0, []() {
-                QMessageBox::warning(nullptr, "API Key Missing",
-                                   "GEMINI_API_KEY not found in .env file.\n"
-                                   "The application may not function correctly.");
+        std::string modelName = get_model_name_from_env();
+
+        if (apiKey.empty() || modelName.empty()) {
+            QTimer::singleShot(0, [apiKey, modelName]() {
+                QString message;
+                if (apiKey.empty()) message += "GEMINI_API_KEY not found in .env file.\n";
+                if (modelName.empty()) message += "MODEL_NAME not found in .env file.\n";
+                message += "The application may not function correctly.";
+                QMessageBox::warning(nullptr, "Configuration Missing", message);
             });
         }
 
@@ -155,8 +177,21 @@ public:
         responseEdit = new QTextEdit(this);
         responseEdit->setReadOnly(true);
         responseEdit->setPlaceholderText("AI response...");
-        responseEdit->hide(); // Mặc định ẩn
-        mainLayout->addWidget(responseEdit);
+        responseContainer = new QWidget(this); // Gán cho member
+        auto* responseLayout = new QVBoxLayout(responseContainer);
+        responseLayout->setContentsMargins(0, 0, 0, 0);
+        responseLayout->addWidget(responseEdit);
+
+        auto* clearBtn = new QPushButton("Clear", this);
+        clearBtn->setFixedSize(50, 25);
+        connect(clearBtn, &QPushButton::clicked, [this]() {
+            responseEdit->clear();
+        });
+        responseLayout->addWidget(clearBtn, 0, Qt::AlignRight);
+
+        responseContainer->hide(); // Ẩn cả container ban đầu
+
+        mainLayout->addWidget(responseContainer);
 
         connect(promptEdit, &PromptEdit::submitRequested, this, &MainWindow::handleSubmit);
 
@@ -167,17 +202,17 @@ public:
         // Shortcut Esc để toggle response và expand cửa sổ
         auto* escShortcut = new QShortcut(QKeySequence("Esc"), this);
         connect(escShortcut, &QShortcut::activated, [this]() {
-            bool isVisible = responseEdit->isVisible();
+            bool isVisible = responseContainer->isVisible();
             if (isVisible) {
                 // Đang hiện, giờ ẩn đi và thu gọn
-                responseEdit->hide();
+                responseContainer->hide();
                 setFixedSize(500, 40);
             } else {
                 // Đang ẩn, giờ hiện ra và mở rộng
                 setMinimumSize(500, 400);
                 setMaximumSize(16777215, 16777215);
         resize(500, 400);
-                responseEdit->show();
+                responseContainer->show();
             }
         });
 
@@ -273,7 +308,7 @@ private slots:
     }
 
     void handleSubmit(const QString& text) {
-        responseEdit->show(); // Hiện khi có submit
+        responseContainer->show(); // Dùng member
 
         // Mở rộng cửa sổ khi bắt đầu gửi request
         setMinimumSize(500, 400);
@@ -297,7 +332,7 @@ private slots:
             }
 
             PromptConfig config;
-            config.model_name="gemini-3.1-flash-lite";
+            config.model_name = get_model_name_from_env();
             std::string response = gemini.generate(parts, config);
 
                 QMetaObject::invokeMethod(this, [this, response]() {
@@ -326,6 +361,7 @@ private:
     PromptEdit* promptEdit;
     QLabel* imagePreview;
     QTextEdit* responseEdit;
+    QWidget* responseContainer;
     QPixmap lastCapturedPixmap;
     qint64 lastCtrlPressTime;
     QWidget* previewWindow = nullptr;

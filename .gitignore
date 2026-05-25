@@ -49,3 +49,10 @@ screen-copilot_autogen/
 temp/
 tmp/
 
+# Build directories
+build/
+*.exe
+
+# Screenshot temp files
+temp_screenshot.png
+
