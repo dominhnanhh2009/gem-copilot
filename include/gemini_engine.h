@@ -35,6 +35,7 @@ struct ContentPart {
 struct PromptConfig {
     std::string model_name = "gemini-1.5-flash";
     float temperature = 0.7f;
+    std::string system_instruction = "";
 };
 
 /**

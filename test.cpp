@@ -28,17 +28,20 @@ int main() {
         GeminiEngine engine(api_key);
         
         PromptConfig config;
-        config.model_name = "gemini-3.1-flash-lite";
+        config.model_name = "gemini-2.5-flash";
+        config.system_instruction = "Bạn là một trợ lý AI nói tiếng Việt ngắn gọn. Mọi câu trả lời của bạn BẮT ĐẦU bằng từ 'HELLOOOO'.";
         
-        // Path supports Unicode directly
-        std::string base64_image = encode_file_to_base64("C:\\Users\\ADMIN\\OneDrive\\Ảnh\\Screenshots\\Screenshot_20260411_104849_Facebook.jpg");
-
-        std::vector<ContentPart> parts = {
-            {ContentPart::Type::IMAGE, base64_image, "image/jpeg"},
-            {ContentPart::Type::TEXT, "Hãy bình phẩm về tác phẩm (ảnh) này.", ""}
-        };
+        std::vector<ContentPart> parts;
+        std::string image_path = "temp_screenshot.png";
+        if (std::filesystem::exists(image_path)) {
+            std::string base64_image = encode_file_to_base64(image_path);
+            parts.push_back({ContentPart::Type::IMAGE, base64_image, "image/png"});
+            parts.push_back({ContentPart::Type::TEXT, "Hãy mô tả bức ảnh này.", ""});
+        } else {
+            parts.push_back({ContentPart::Type::TEXT, "Chào bạn, hãy giới thiệu bản thân.", ""});
+        }
         
-        std::cout << "Sending request to Gemini..." << std::endl;
+        std::cout << "Sending request to Gemini with System Prompt: \"" << config.system_instruction << "\"" << std::endl;
         std::string response = engine.generate(parts, config);
         
         std::cout << "\nResponse:\n" << response << std::endl;

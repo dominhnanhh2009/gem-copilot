@@ -38,6 +38,16 @@ std::string GeminiEngine::generate(const std::vector<ContentPart>& parts, const 
     // Add configuration
     root["generationConfig"]["temperature"] = config.temperature;
 
+    if (!config.system_instruction.empty()) {
+        Json::Value sys_inst;
+        Json::Value sys_parts(Json::arrayValue);
+        Json::Value sys_part;
+        sys_part["text"] = config.system_instruction;
+        sys_parts.append(sys_part);
+        sys_inst["parts"] = sys_parts;
+        root["system_instruction"] = sys_inst;
+    }
+
     Json::Value contents_array(Json::arrayValue);
     Json::Value content_obj;
     Json::Value parts_array(Json::arrayValue);
